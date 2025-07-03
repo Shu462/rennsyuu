@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Firestore練習テスト</title>
+</head>
+<body>
+  <h1>Firestore練習テスト</h1>
+
+  <!-- ログイン -->
+  <h2>ログイン</h2>
+  <input type="text" id="loginEmail" placeholder="社員番号@dummy.local">
+  <input type="password" id="loginPassword" placeholder="パスワード">
+  <button id="loginBtn">ログイン</button>
+
+  <!-- 書き込みフォーム -->
+  <h2>メモ保存</h2>
+  <textarea id="memoInput" placeholder="メモを入力"></textarea>
+  <button id="saveBtn">Firestoreに保存</button>
+
+  <!-- 履歴表示 -->
+  <h2>保存履歴</h2>
+  <ul id="historyList"></ul>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    // ✅ あなたの Firebase設定に差し替えて！
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID"
+    };
+
+    // 初期化
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // ログインボタン
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("ログイン成功！");
+      } catch (e) {
+        alert("ログイン失敗: " + e.message);
+      }
+    });
+
+    // Firestoreに書き込み
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const memo = document.getElementById("memoInput").value;
+      const user = auth.currentUser;
+      if (!user) {
+        alert("ログインしてね！");
+        return;
+      }
+      try {
+        await addDoc(collection(db, "memos"), {
+          uid: user.uid,
+          email: user.email,
+          memo: memo,
+          timestamp: new Date().toISOString()
+        });
+        alert("保存しました！");
+        loadHistory();
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    // Firestoreから読み取り
+    async function loadHistory() {
+      const querySnapshot = await getDocs(collection(db, "memos"));
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${data.email}: ${data.memo} (${data.timestamp})`;
+        list.appendChild(li);
+      });
+    }
+
+    // ログイン状態変わったら履歴ロード
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadHistory();
+      }
+    });
+
+  </script>
+</body>
+</html>
