@@ -28,11 +28,11 @@
     import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    // ✅ あなたの Firebase設定に差し替えて！
+    // ✅ 正しいFirebase設定
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID"
+      apiKey: "AlzaSyDy6V0bdBbxyJVCPZsJMD0hUV_1ZZ32Eig",
+      authDomain: "ninnttei.firebaseapp.com",
+      projectId: "ninnttei"
     };
 
     // 初期化
@@ -87,13 +87,12 @@
       });
     }
 
-    // ログイン状態変わったら履歴ロード
+    // ログイン状態が変わったら履歴ロード
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loadHistory();
       }
     });
-
   </script>
 </body>
 </html>
